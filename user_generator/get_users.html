@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+	var count = 0,
+		users = [];
+	
+	function getData(){
+
+		$.ajax({
+			url: 'https://randomuser.me/api/',
+			dataType: 'json',
+			success: function(data) {
+				var x = {};
+
+				x.firstName = data.results[0].name.first;
+				x.lastName = data.results[0].name.last;
+				x.street = data.results[0].location.street;
+				x.city = data.results[0].location.city;
+				x.state = data.results[0].location.state;
+				x.zip = data.results[0].location.postcode;
+				x.img = data.results[0].picture.thumbnail;
+
+				users[count] = JSON.stringify(x);
+
+				for (var prop in x) {
+					console.log(x);
+					console.log(prop);
+					console.log(x[prop]);
+					x[prop] = cleanData(x[prop]);
+				}
+
+				storeData(x);
+				count++;
+
+				if (count == 10){
+					for (var i = 0; i < users.length; i++) {
+						var br = document.createElement("br");
+						document.body.innerHTML += users[i];
+						document.body.appendChild(br);
+					}
+					count = 0;
+					users = []; 
+				} else {
+					getData();
+				}
+			}
+		});
+
+	}
+
+	function cleanData(data){
+		console.log(data);
+		let temp = data.toString().replace(/[^0-9a-z]/gi, '');
+		return temp;
+	}
+
+	function storeData(data){
+		$.ajax({
+			url: `http://localhost/Web_Design_4/Web_Services/user_generator/save_users.php?firstName=${data.firstName}&lastName=${data.lastName}&street=${data.street}&city=${data.city}&state=${data.state}&zip=${data.zip}&img=${data.img}`,
+			success: function(res) {
+				document.querySelector("main").innerHTML += res;
+			}
+		});
+	}
+	
+</script>
+<html>
+<head>
+	<title>Populate DB with Users</title>
+</head>
+<body>
+	<main></main>
+	<button onclick="getData();" style="display: block; margin: 25px 0px;">Get 10 Fake User Profiles</button>
+</body>
+</html>
+
+
+
+
+
